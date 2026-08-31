@@ -1,9 +1,15 @@
 import { useState } from 'react';
-import { keepPreviousData, useQuery } from '@tanstack/react-query';
-import { fetchNotes } from '../../services/noteService';
+import {
+  keepPreviousData,
+  useMutation,
+  useQuery,
+  useQueryClient,
+} from '@tanstack/react-query';
+import { createNote, fetchNotes } from '../../services/noteService';
 import NoteList from '../NoteList/NoteList';
 import Pagination from '../Pagination/Pagination';
 import Modal from '../Modal/Modal';
+import NoteForm from '../NoteForm/NoteForm';
 import css from './App.module.css';
 
 const PER_PAGE = 12;
@@ -11,6 +17,16 @@ const PER_PAGE = 12;
 export default function App() {
   const [currentPage, setCurrentPage] = useState(1);
   const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const queryClient = useQueryClient();
+
+  const createMutation = useMutation({
+    mutationFn: createNote,
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ['notes'] });
+      setIsModalOpen(false);
+    },
+  });
 
   const { data } = useQuery({
     queryKey: ['notes', currentPage],
@@ -46,7 +62,11 @@ export default function App() {
 
       {isModalOpen && (
         <Modal onClose={() => setIsModalOpen(false)}>
-          <p>Note form will be here.</p>
+          <NoteForm
+            onSubmit={note => createMutation.mutate(note)}
+            onCancel={() => setIsModalOpen(false)}
+            isSubmitting={createMutation.isPending}
+          />
         </Modal>
       )}
     </div>
