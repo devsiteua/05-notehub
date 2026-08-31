@@ -3,12 +3,14 @@ import { keepPreviousData, useQuery } from '@tanstack/react-query';
 import { fetchNotes } from '../../services/noteService';
 import NoteList from '../NoteList/NoteList';
 import Pagination from '../Pagination/Pagination';
+import Modal from '../Modal/Modal';
 import css from './App.module.css';
 
 const PER_PAGE = 12;
 
 export default function App() {
   const [currentPage, setCurrentPage] = useState(1);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   const { data } = useQuery({
     queryKey: ['notes', currentPage],
@@ -22,7 +24,15 @@ export default function App() {
 
   return (
     <div className={css.app}>
-      <header className={css.toolbar}></header>
+      <header className={css.toolbar}>
+        <button
+          className={css.button}
+          type="button"
+          onClick={() => setIsModalOpen(true)}
+        >
+          Create note +
+        </button>
+      </header>
 
       {data && data.totalPages > 1 && (
         <Pagination
@@ -33,6 +43,12 @@ export default function App() {
       )}
 
       {data && data.notes.length > 0 && <NoteList notes={data.notes} />}
+
+      {isModalOpen && (
+        <Modal onClose={() => setIsModalOpen(false)}>
+          <p>Note form will be here.</p>
+        </Modal>
+      )}
     </div>
   );
 }
