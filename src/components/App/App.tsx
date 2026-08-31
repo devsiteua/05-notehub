@@ -5,7 +5,7 @@ import {
   useQuery,
   useQueryClient,
 } from '@tanstack/react-query';
-import { createNote, fetchNotes } from '../../services/noteService';
+import { createNote, deleteNote, fetchNotes } from '../../services/noteService';
 import NoteList from '../NoteList/NoteList';
 import Pagination from '../Pagination/Pagination';
 import Modal from '../Modal/Modal';
@@ -25,6 +25,13 @@ export default function App() {
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: ['notes'] });
       setIsModalOpen(false);
+    },
+  });
+
+  const deleteMutation = useMutation({
+    mutationFn: deleteNote,
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ['notes'] });
     },
   });
 
@@ -58,7 +65,12 @@ export default function App() {
         />
       )}
 
-      {data && data.notes.length > 0 && <NoteList notes={data.notes} />}
+      {data && data.notes.length > 0 && (
+        <NoteList
+          notes={data.notes}
+          onDelete={noteId => deleteMutation.mutate(noteId)}
+        />
+      )}
 
       {isModalOpen && (
         <Modal onClose={() => setIsModalOpen(false)}>
