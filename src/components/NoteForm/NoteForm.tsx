@@ -38,26 +38,27 @@ export default function NoteForm({
       onSubmit={onSubmit}
     >
       <Form className={css.form}>
-        <label className={css.formGroup}>
-          Title
-          <Field className={css.input} type="text" name="title" />
+        <div className={css.formGroup}>
+          <label htmlFor="title">Title</label>
+          <Field id="title" className={css.input} type="text" name="title" />
           <ErrorMessage name="title" component="span" className={css.error} />
-        </label>
+        </div>
 
-        <label className={css.formGroup}>
-          Content
+        <div className={css.formGroup}>
+          <label htmlFor="content">Content</label>
           <Field
+            id="content"
             className={css.textarea}
             as="textarea"
             name="content"
             rows={8}
           />
           <ErrorMessage name="content" component="span" className={css.error} />
-        </label>
+        </div>
 
-        <label className={css.formGroup}>
-          Tag
-          <Field className={css.select} as="select" name="tag">
+        <div className={css.formGroup}>
+          <label htmlFor="tag">Tag</label>
+          <Field id="tag" className={css.select} as="select" name="tag">
             <option value="Todo">Todo</option>
             <option value="Work">Work</option>
             <option value="Personal">Personal</option>
@@ -65,7 +66,7 @@ export default function NoteForm({
             <option value="Shopping">Shopping</option>
           </Field>
           <ErrorMessage name="tag" component="span" className={css.error} />
-        </label>
+        </div>
 
         <div className={css.actions}>
           <button className={css.cancelButton} type="button" onClick={onCancel}>
