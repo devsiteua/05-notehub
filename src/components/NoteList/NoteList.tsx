@@ -4,9 +4,14 @@ import css from './NoteList.module.css';
 interface NoteListProps {
   notes: Note[];
   onDelete: (noteId: string) => void;
+  deletingNoteId?: string;
 }
 
-export default function NoteList({ notes, onDelete }: NoteListProps) {
+export default function NoteList({
+  notes,
+  onDelete,
+  deletingNoteId,
+}: NoteListProps) {
   return (
     <ul className={css.list}>
       {notes.map(note => (
@@ -21,6 +26,7 @@ export default function NoteList({ notes, onDelete }: NoteListProps) {
               className={css.button}
               type="button"
               onClick={() => onDelete(note.id)}
+              disabled={deletingNoteId === note.id}
             >
               Delete
             </button>

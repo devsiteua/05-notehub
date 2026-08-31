@@ -54,6 +54,11 @@
   background-color: #bb2d3b;
 }
 
+.button:disabled {
+  background-color: #6c757d;
+  cursor: not-allowed;
+}
+
 .footer {
   display: flex;
   justify-content: space-between;

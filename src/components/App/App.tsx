@@ -38,12 +38,22 @@ export default function App() {
     },
   });
 
+  const handleOpenModal = () => {
+    createMutation.reset();
+    setIsModalOpen(true);
+  };
+
+  const handleCloseModal = () => {
+    createMutation.reset();
+    setIsModalOpen(false);
+  };
+
   const handleSearch = useDebouncedCallback((value: string) => {
     setSearchQuery(value);
     setCurrentPage(1);
   }, 300);
 
-  const { data } = useQuery({
+  const { data, isLoading, isError, error } = useQuery({
     queryKey: ['notes', currentPage, searchQuery],
     queryFn: () =>
       fetchNotes({
@@ -59,7 +69,7 @@ export default function App() {
       <header className={css.toolbar}>
         <SearchBox onChange={handleSearch} />
 
-        {data && data.totalPages > 1 && (
+        {!isError && data && data.totalPages > 1 && (
           <Pagination
             pageCount={data.totalPages}
             currentPage={currentPage}
@@ -67,27 +77,42 @@ export default function App() {
           />
         )}
 
-        <button
-          className={css.button}
-          type="button"
-          onClick={() => setIsModalOpen(true)}
-        >
+        <button className={css.button} type="button" onClick={handleOpenModal}>
           Create note +
         </button>
       </header>
 
-      {data && data.notes.length > 0 && (
+      {deleteMutation.isError && (
+        <p>Failed to delete note: {deleteMutation.error.message}</p>
+      )}
+
+      {isLoading && <p>Loading notes...</p>}
+
+      {isError && <p>Failed to load notes: {error.message}</p>}
+
+      {!isLoading && !isError && data && data.notes.length === 0 && (
+        <p>No notes found.</p>
+      )}
+
+      {!isError && data && data.notes.length > 0 && (
         <NoteList
           notes={data.notes}
           onDelete={noteId => deleteMutation.mutate(noteId)}
+          deletingNoteId={
+            deleteMutation.isPending ? deleteMutation.variables : undefined
+          }
         />
       )}
 
       {isModalOpen && (
-        <Modal onClose={() => setIsModalOpen(false)}>
+        <Modal onClose={handleCloseModal}>
+          {createMutation.isError && (
+            <p>Failed to create note: {createMutation.error.message}</p>
+          )}
+
           <NoteForm
             onSubmit={note => createMutation.mutate(note)}
-            onCancel={() => setIsModalOpen(false)}
+            onCancel={handleCloseModal}
             isSubmitting={createMutation.isPending}
           />
         </Modal>
