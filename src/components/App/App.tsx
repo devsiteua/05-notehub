@@ -10,6 +10,8 @@ import NoteList from '../NoteList/NoteList';
 import Pagination from '../Pagination/Pagination';
 import Modal from '../Modal/Modal';
 import NoteForm from '../NoteForm/NoteForm';
+import { useDebouncedCallback } from 'use-debounce';
+import SearchBox from '../SearchBox/SearchBox';
 import css from './App.module.css';
 
 const PER_PAGE = 12;
@@ -17,6 +19,7 @@ const PER_PAGE = 12;
 export default function App() {
   const [currentPage, setCurrentPage] = useState(1);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
 
   const queryClient = useQueryClient();
 
@@ -35,12 +38,18 @@ export default function App() {
     },
   });
 
+  const handleSearch = useDebouncedCallback((value: string) => {
+    setSearchQuery(value);
+    setCurrentPage(1);
+  }, 300);
+
   const { data } = useQuery({
-    queryKey: ['notes', currentPage],
+    queryKey: ['notes', currentPage, searchQuery],
     queryFn: () =>
       fetchNotes({
         page: currentPage,
         perPage: PER_PAGE,
+        search: searchQuery,
       }),
     placeholderData: keepPreviousData,
   });
@@ -48,6 +57,16 @@ export default function App() {
   return (
     <div className={css.app}>
       <header className={css.toolbar}>
+        <SearchBox onChange={handleSearch} />
+
+        {data && data.totalPages > 1 && (
+          <Pagination
+            pageCount={data.totalPages}
+            currentPage={currentPage}
+            onPageChange={setCurrentPage}
+          />
+        )}
+
         <button
           className={css.button}
           type="button"
@@ -56,14 +75,6 @@ export default function App() {
           Create note +
         </button>
       </header>
-
-      {data && data.totalPages > 1 && (
-        <Pagination
-          pageCount={data.totalPages}
-          currentPage={currentPage}
-          onPageChange={setCurrentPage}
-        />
-      )}
 
       {data && data.notes.length > 0 && (
         <NoteList
